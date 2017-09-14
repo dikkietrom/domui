@@ -42,6 +42,9 @@ import org.slf4j.*;
  * @version 1.0
  */
 public class StringTool {
+	static final String[] LOC_PRESET = {};
+
+	static final String[] LOC_ENDSET = {"to.etc.dbpool.", "org.apache.tomcat.", "org.apache.coyote.", "org.apache.catalina.", "java.util.concurrent.", "to.etc.domui.server."};
 
 	/**
 	 * PLEASE DO NOT USE ANYMORE - this limit will change in Oracle 12. To get the
@@ -2329,6 +2332,23 @@ public class StringTool {
 			strStacktrace(sb, z);
 		}
 	}
+
+	@Nonnull
+	static public final String getFilteredLocation() {
+		StringBuilder sb = new StringBuilder();
+		Exception xxx = null;
+		try {
+			throw new Exception();
+		} catch(Exception x) {
+			xxx = x;
+		}
+		if(null != xxx) {
+			strStacktraceFiltered(sb, xxx, LOC_PRESET, LOC_ENDSET, 999);
+		}
+
+		return sb.toString();
+	}
+
 
 	/**
 	 * Kept in api since it was useful for some debugs while coding, use just for debug purposes only, do not use in produciton code.
