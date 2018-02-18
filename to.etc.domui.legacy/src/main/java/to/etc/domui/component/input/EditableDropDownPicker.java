@@ -14,6 +14,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * DEPRECATED: Use EditableComboLookup instead.
+ *
+ * This component incorrectly uses inheritance from TextStr but it handles values of
+ * type T. This inconsistency means the IControl cannot be implemented, and many standard
+ * methods on the control behave oddly as the control somehow is about 2 types at the same
+ * time.
+ *
+ *
  * Encapsulates AutocompleteText and drop down picker into single component. Input behaves as autocomplete field that does search on select inside select within drop down picker.
  * Search is done at client side for faster user experience.
  * It also allows entering of new data (not contained inside predefined list), that is why it works on-top of String based input.
@@ -23,6 +31,7 @@ import java.util.List;
  * @author <a href="mailto:vmijic@execom.eu">Vladimir Mijic</a>
  * Created on Nov 6, 2012
  */
+@Deprecated
 public class EditableDropDownPicker<T> extends AutocompleteText {
 	@Nullable
 	private DropDownPicker<T> m_picker;
@@ -168,11 +177,11 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 			}
 		}
 	}
-	
+
 	/**
 	 * Update data displayed in picker select options.
 	 * @param data
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void updateData(@Nonnull List<T> data) throws Exception {
 		setData(data);
@@ -193,7 +202,7 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 	}
 
 	private void setComboSize(int size) throws Exception {
-		int newSize = size > DropDownPicker.DEFAULT_COMBO_SIZE ? DropDownPicker.DEFAULT_COMBO_SIZE : size; 
+		int newSize = size > DropDownPicker.DEFAULT_COMBO_SIZE ? DropDownPicker.DEFAULT_COMBO_SIZE : size;
 		if(m_picker != null){
 			m_picker.getSelectControl().setSize(newSize);
 		}

@@ -1,7 +1,7 @@
 package to.etc.domuidemo.pages.overview.input;
 
 import to.etc.domui.component.buttons.DefaultButton;
-import to.etc.domui.component.input.EditableDropDownPicker;
+import to.etc.domui.component.input.EditableComboLookup;
 import to.etc.domui.dom.html.Div;
 import to.etc.domui.dom.html.UrlPage;
 import to.etc.util.DateUtil;
@@ -28,22 +28,26 @@ public class DropDownPickerPage extends UrlPage {
 			dates.add(cal.getTime());
 		}
 
-		EditableDropDownPicker<Date> picker = new EditableDropDownPicker<>(Date.class);
+		EditableComboLookup<Date> picker = new EditableComboLookup<>(Date.class);
 		add(picker);
-		picker.updateData(dates);
+		picker.setData(dates);
 		SimpleDateFormat sdf = new SimpleDateFormat("MM-yyyy");
-		picker.setToStringConverter((l, a) -> a == null ? null : sdf.format(a));
+		picker.setConverter((l, a) -> a == null ? null : sdf.format(a));
+
+		picker.setMandatory(true);
 
 		picker.setOnValueChanged(a -> {
 			System.out.println(">> " + a);
 		});
 
 
+		Div d = new Div();
+		add(d);
 		DefaultButton btn = new DefaultButton("validate", a -> {
-			Div d = new Div();
-			add(d);
-			d.add("Control value = " + picker.getValue());
+			Div d2 = new Div();
+			add(d2);
+			d2.add("Control value = " + picker.getValue());
 		});
-		add(btn);
+		d.add(btn);
 	}
 }
