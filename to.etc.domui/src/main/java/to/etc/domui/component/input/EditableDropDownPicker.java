@@ -1,15 +1,17 @@
 package to.etc.domui.component.input;
 
-import java.util.*;
-
-import javax.annotation.*;
-
-import to.etc.domui.component.event.*;
 import to.etc.domui.component.input.DropDownPicker.HAlign;
-import to.etc.domui.converter.*;
-import to.etc.domui.dom.html.*;
-import to.etc.domui.util.*;
-import to.etc.webapp.nls.*;
+import to.etc.domui.converter.ConverterRegistry;
+import to.etc.domui.converter.IObjectToStringConverter;
+import to.etc.domui.dom.html.IValueChanged;
+import to.etc.domui.themes.Theme;
+import to.etc.domui.util.DomUtil;
+import to.etc.webapp.nls.NlsContext;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Encapsulates AutocompleteText and drop down picker into single component. Input behaves as autocomplete field that does search on select inside select within drop down picker.
@@ -78,34 +80,36 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 		super.createContent();
 
 		DropDownPicker<T> picker = m_picker = new DropDownPicker<T>(m_data);
-		if(m_dropDownIcon != null && !isReadOnly()) {
-			picker.setSrc(m_dropDownIcon);
+		String dropDownIcon = m_dropDownIcon;
+		if(dropDownIcon == null) {
+			dropDownIcon = Theme.BTN_EDIT;
+		}
+		if(!isReadOnly()) {
+			picker.setSrc(dropDownIcon);					// FIXME WTF is that button doing here when readonly?
 		}
 
 		picker.setMandatory(isMandatory());
 		picker.setValue(null);
 		picker.setDisabled(isDisabled());
+		picker.setReadOnly(isReadOnly());
 		picker.setHalign(m_halign);
 		picker.setAlignmentBase(this);
-		picker.setOnBeforeShow(new INotifyEvent<DropDownPicker<T>, ComboLookup<T>>() {
-			@Override
-			public void onNotify(@Nonnull DropDownPicker<T> sender, @Nullable ComboLookup<T> combo) throws Exception {
-				String text = getValueSafe();
-				clearMessage();
-				adjustSelection(combo, text);
-			}
+
+		//-- Make sure the lookup combo renders texts as we expect it
+		picker.getSelectControl().setContentRenderer((node, object) -> node.add(convertObjectToString(object)));
+
+		picker.setOnBeforeShow((sender, combo) -> {
+			String text = getValueSafe();
+			clearMessage();
+			adjustSelection(combo, text);
 		});
 
-		picker.setOnValueChanged(new IValueChanged<DropDownPicker<T>>() {
-
-			@Override
-			public void onValueChanged(@Nonnull DropDownPicker<T> component) throws Exception {
-				T value = m_object = component.getValueSafe();
-				setValue(convertObjectToString(NlsContext.getCurrencyLocale(), value));
-				IValueChanged<EditableDropDownPicker<T>> onValueChanged = (IValueChanged<EditableDropDownPicker<T>>) EditableDropDownPicker.this.getOnValueChanged();
-				if(onValueChanged != null) {
-					onValueChanged.onValueChanged(EditableDropDownPicker.this);
-				}
+		picker.setOnValueChanged((IValueChanged<DropDownPicker<T>>) component -> {
+			T value = m_object = component.getValueSafe();
+			setValue(convertObjectToString(value));
+			IValueChanged<EditableDropDownPicker<T>> onValueChanged = (IValueChanged<EditableDropDownPicker<T>>) EditableDropDownPicker.this.getOnValueChanged();
+			if(onValueChanged != null) {
+				onValueChanged.onValueChanged(EditableDropDownPicker.this);
 			}
 		});
 
@@ -115,11 +119,12 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 		initializeJS();
 	}
 
-	protected String convertObjectToString(Locale currencyLocale, T val) {
-		if(m_toStringConverter != null) {
-			return m_toStringConverter.convertObjectToString(NlsContext.getCurrencyLocale(), val);
+	private String convertObjectToString(T val) {
+		IObjectToStringConverter<T> converter = m_toStringConverter;
+		if(converter == null) {
+			return ConverterRegistry.getConverter(m_type, null).convertObjectToString(NlsContext.getLocale(), val);
 		} else {
-			return ConverterRegistry.getConverter(m_type, null).convertObjectToString(NlsContext.getCurrencyLocale(), val);
+			return converter.convertObjectToString(NlsContext.getLocale(), val);
 		}
 	}
 
@@ -128,7 +133,7 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 		DropDownPicker<T> picker = DomUtil.nullChecked(m_picker);
 		for(int i = 0; i < combo.getData().size(); i++) {
 			T val = combo.getData().get(i);
-			String optionText = convertObjectToString(NlsContext.getCurrencyLocale(), val);
+			String optionText = convertObjectToString(val);
 			if(text != null && text.equals(optionText)) {
 				combo.setValue(val);
 				picker.setButtonValue(text);
@@ -194,8 +199,8 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 		}
 	}
 
-	public @Nullable
-	String getDropDownIcon() {
+	@Nullable
+	public String getDropDownIcon() {
 		return m_dropDownIcon;
 	}
 
@@ -218,13 +223,14 @@ public class EditableDropDownPicker<T> extends AutocompleteText {
 		}
 	}
 
-	public @Nullable
-	IObjectToStringConverter<T> getToStringConverter() {
+	@Nullable
+	public IObjectToStringConverter<T> getToStringConverter() {
 		return m_toStringConverter;
 	}
 
 	public void setToStringConverter(@Nullable IObjectToStringConverter<T> toStringConverter) {
 		m_toStringConverter = toStringConverter;
+		forceRebuild();
 	}
 
 	@Nullable

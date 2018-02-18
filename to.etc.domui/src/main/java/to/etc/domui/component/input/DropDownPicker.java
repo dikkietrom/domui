@@ -13,7 +13,6 @@ import java.util.*;
 /**
  * Control that behaves as {@link SmallImgButton} that has built in click handler that popups select list with predefined data to choose from.
  *
- *
  * @author <a href="mailto:vmijic@execom.eu">Vladimir Mijic</a>
  * Created on Nov 26, 2012
  */
@@ -59,7 +58,7 @@ public class DropDownPicker<T> extends SmallImgButton implements IControl<T> {
 	 * DropDownPicker constructor. By default size of drop down list is DropDownPicker.DEFAULT_COMBO_SIZE.
 	 */
 	public DropDownPicker() {
-		m_picker = new ComboLookup<T>();
+		m_picker = new ComboLookup<>();
 	}
 
 	/**
@@ -78,7 +77,7 @@ public class DropDownPicker<T> extends SmallImgButton implements IControl<T> {
 	public DropDownPicker(@Nonnull List<T> data, int size) {
 		m_data = data;
 		m_size = size;
-		m_picker = new ComboLookup<T>(m_data);
+		m_picker = new ComboLookup<>(m_data);
 	}
 
 	@Override
@@ -104,20 +103,8 @@ public class DropDownPicker<T> extends SmallImgButton implements IControl<T> {
 		}
 		m_picker.setSize(m_size);
 		m_picker.setHeight("auto");
-		m_picker.setClicked(new IClicked<NodeBase>() {
-
-			@Override
-			public void clicked(@Nonnull NodeBase node) throws Exception {
-				handlePickerValueChanged();
-			}
-		});
-		m_picker.setReturnPressed(new IReturnPressed<Select>() {
-
-			@Override
-			public void returnPressed(@Nonnull Select node) throws Exception {
-				handlePickerValueChanged();
-			}
-		});
+		m_picker.setClicked(node -> handlePickerValueChanged());
+		m_picker.setReturnPressed(node -> handlePickerValueChanged());
 
 		List<T> data = m_data;
 		if(m_selected != null) {
@@ -331,8 +318,11 @@ public class DropDownPicker<T> extends SmallImgButton implements IControl<T> {
 		m_alignmentBase = halignmentBase;
 	}
 
-	public @Nonnull
-	Select getSelectControl() throws Exception {
+	/**
+	 * FIXME Breaks encapsulation.
+	 */
+	@Nonnull
+	public ComboLookup<T> getSelectControl() throws Exception {
 		return m_picker;
 	}
 
@@ -377,11 +367,11 @@ public class DropDownPicker<T> extends SmallImgButton implements IControl<T> {
 
 	@Override
 	public boolean isReadOnly() {
-		return false;
+		return getDisplay() == DisplayType.NONE;
 	}
 
 	@Override
 	public void setReadOnly(boolean ro) {
-		throw new UnsupportedOperationException("setReadOnly() not supported in " + getClass().getName());
+		setDisplay(ro ? DisplayType.NONE : null);
 	}
 }
