@@ -69,7 +69,7 @@ public class EditableComboLookup<T> extends Div implements IControl<T> {
 		picker.setData(m_data);
 		String dropDownIcon = m_dropDownIcon;
 		if(dropDownIcon == null) {
-			dropDownIcon = Theme.BTN_EDIT;
+			dropDownIcon = Theme.BTN_DROPDOWN;
 		}
 		if(!isReadOnly()) {
 			picker.setSrc(dropDownIcon);                    // FIXME WTF is that button doing here when readonly?
