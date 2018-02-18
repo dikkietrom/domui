@@ -2,7 +2,9 @@ package to.etc.domuidemo.pages.overview.input;
 
 import to.etc.domui.component.buttons.DefaultButton;
 import to.etc.domui.component.input.EditableComboLookup;
+import to.etc.domui.dom.html.Checkbox;
 import to.etc.domui.dom.html.Div;
+import to.etc.domui.dom.html.Label;
 import to.etc.domui.dom.html.UrlPage;
 import to.etc.util.DateUtil;
 
@@ -49,5 +51,16 @@ public class DropDownPickerPage extends UrlPage {
 			d2.add("Control value = " + picker.getValue());
 		});
 		d.add(btn);
+
+		Checkbox readOnly = new Checkbox();
+		Label lb = new Label(readOnly, "Read Only");
+		d.add(readOnly);
+		d.add(lb);
+
+		readOnly.bind().to(picker, "readOnly");
+		readOnly.immediate();
+
+
+
 	}
 }

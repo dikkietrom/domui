@@ -79,6 +79,9 @@ public class EditableComboLookup<T> extends Div implements IControl<T> {
 		picker.setValue(null);
 		picker.setDisabled(isDisabled());
 		picker.setReadOnly(isReadOnly());
+		m_text.setDisabled(isDisabled());
+		m_text.setReadOnly(isReadOnly());
+		m_text.setMandatory(isMandatory());
 		picker.setHalign(m_halign);
 		picker.setAlignmentBase(this);
 
@@ -103,7 +106,6 @@ public class EditableComboLookup<T> extends Div implements IControl<T> {
 		add(m_text);
 		add(picker);
 
-		appendAfterMe(picker);
 		picker.build();
 		appendCreateJS("WebUI.initAutocomplete('" + m_text.getActualID() + "','" + m_picker.getSelectControl().getActualID() + "')");
 	}
